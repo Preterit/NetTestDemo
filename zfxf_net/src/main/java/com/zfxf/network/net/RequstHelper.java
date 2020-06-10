@@ -4,9 +4,8 @@ package com.zfxf.network.net;
 import com.zfxf.network.entriy.BaseResponse;
 import com.zfxf.network.interfaces.IRequestCallBack;
 
-import java.io.IOException;
-
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -16,16 +15,22 @@ import retrofit2.Response;
  */
 public class RequstHelper {
 
-    public static <T> void postEnqueue(Call<BaseResponse<T>> responseCall, IRequestCallBack<T> callback) {
-        try {
-            Response<BaseResponse<T>> execute = responseCall.execute();
-            BaseResponse<T> baseResponse = execute.body();
-            if (baseResponse != null && baseResponse.getCode() == 200) {
+    public static <T> void postEnqueue(Call<BaseResponse<T>> responseCall, final IRequestCallBack<T> callback) {
+
+        responseCall.enqueue(new Callback<BaseResponse<T>>() {
+            @Override
+            public void onResponse(Call<BaseResponse<T>> call, Response<BaseResponse<T>> response) {
+                if (response != null) {
+                    BaseResponse<T> body = response.body();
+                    callback.success(body.getData());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BaseResponse<T>> call, Throwable t) {
 
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+        });
 
+    }
 }
